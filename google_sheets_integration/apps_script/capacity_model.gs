@@ -5,31 +5,57 @@
 
 // Main function to process data and create capacity model
 function createCapacityModel() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet1 = spreadsheet.getSheetByName('Sheet1');
-  const matrixSheet = spreadsheet.getSheetByName('Matrix');
-  
-  if (!sheet1) {
-    throw new Error('Sheet1 not found. Please ensure your raw data is in Sheet1.');
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet1 = spreadsheet.getSheetByName('Sheet1');
+    const matrixSheet = spreadsheet.getSheetByName('Matrix');
+    
+    Logger.log('Starting Capacity Model generation...');
+    
+    if (!sheet1) {
+      throw new Error('Sheet1 not found. Please ensure your raw data is in Sheet1.');
+    }
+    
+    Logger.log('Sheet1 found. Checking data...');
+    
+    // Check if Sheet1 has data
+    const dataRange = sheet1.getDataRange();
+    const rowCount = dataRange.getNumRows();
+    const colCount = dataRange.getNumColumns();
+    
+    Logger.log(`Sheet1 has ${rowCount} rows and ${colCount} columns`);
+    
+    if (rowCount < 2) {
+      throw new Error('Sheet1 must have at least 2 rows (header + data). Current rows: ' + rowCount);
+    }
+    
+    if (!matrixSheet) {
+      Logger.log('Creating Matrix sheet...');
+      createMatrixSheet();
+    }
+    
+    // Get matrix criteria
+    const matrixCriteria = getMatrixCriteria();
+    Logger.log('Matrix criteria loaded: ' + Object.keys(matrixCriteria).length + ' roles');
+    
+    // Process data
+    Logger.log('Processing sales data...');
+    const capacityData = processSalesData(sheet1, matrixCriteria);
+    Logger.log('Processed ' + capacityData.length + ' sales reps');
+    
+    // Create or update Capacity Model sheet
+    Logger.log('Creating Capacity Model sheet...');
+    createCapacityModelSheet(capacityData);
+    
+    // Add menu item
+    addMenu();
+    
+    Logger.log('Capacity Model created successfully!');
+    
+  } catch (error) {
+    Logger.log('Error: ' + error.toString());
+    throw error;
   }
-  
-  if (!matrixSheet) {
-    createMatrixSheet();
-  }
-  
-  // Get matrix criteria
-  const matrixCriteria = getMatrixCriteria();
-  
-  // Process data
-  const capacityData = processSalesData(sheet1, matrixCriteria);
-  
-  // Create or update Capacity Model sheet
-  createCapacityModelSheet(capacityData);
-  
-  // Add menu item
-  addMenu();
-  
-  Logger.log('Capacity Model created successfully!');
 }
 
 // Get matrix criteria from Matrix sheet
@@ -60,11 +86,24 @@ function processSalesData(sheet1, matrixCriteria) {
   const data = sheet1.getDataRange().getValues();
   const headers = data[0];
   
+  Logger.log('Headers found: ' + headers.join(', '));
+  
   // Find column indices
   const salesRepFirstIndex = headers.indexOf('Sales Rep First');
   const salesRepLastIndex = headers.indexOf('Sales Rep Last');
   const subtotalIndex = headers.indexOf('Subtotal');
   const shipToCountryIndex = headers.indexOf('ShipTo Country');
+  
+  Logger.log(`Column indices - Sales Rep First: ${salesRepFirstIndex}, Sales Rep Last: ${salesRepLastIndex}, Subtotal: ${subtotalIndex}, ShipTo Country: ${shipToCountryIndex}`);
+  
+  // Check if required columns exist
+  if (salesRepFirstIndex === -1 || salesRepLastIndex === -1) {
+    throw new Error('Required columns not found. Please ensure Sheet1 has "Sales Rep First" and "Sales Rep Last" columns.');
+  }
+  
+  if (subtotalIndex === -1) {
+    Logger.log('Warning: "Subtotal" column not found. Sales amounts will be set to 0.');
+  }
   
   // Find project-related columns (assuming they contain project information)
   const projectColumns = headers.filter(header => 
@@ -74,6 +113,7 @@ function processSalesData(sheet1, matrixCriteria) {
   );
   
   const projectColumnIndices = projectColumns.map(col => headers.indexOf(col));
+  Logger.log('Project columns found: ' + projectColumns.join(', '));
   
   // Group data by Sales Rep
   const groupedData = {};
@@ -199,15 +239,22 @@ function formatCapacityModelSheet(sheet) {
   headerRange.setBackground('#4285f4');
   headerRange.setFontColor('white');
   
-  // Format currency column
-  sheet.getRange(2, 3, sheet.getLastRow() - 1, 1).setNumberFormat('$#,##0.00');
+  // Only format data rows if there are any
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    // Format currency column
+    sheet.getRange(2, 3, lastRow - 1, 1).setNumberFormat('$#,##0.00');
+    
+    // Add borders to data
+    const dataRange = sheet.getRange(1, 1, lastRow, 8);
+    dataRange.setBorder(true, true, true, true, true, true);
+  } else {
+    // Just add borders to header row
+    headerRange.setBorder(true, true, true, true, true, true);
+  }
   
   // Auto-resize columns
   sheet.autoResizeColumns(1, 8);
-  
-  // Add borders
-  const dataRange = sheet.getRange(1, 1, sheet.getLastRow(), 8);
-  dataRange.setBorder(true, true, true, true, true, true);
 }
 
 // Create Matrix sheet with default criteria
