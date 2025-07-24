@@ -48,9 +48,12 @@ def main():
         
         elif args.command == 'generate':
             print("Generating capacity model...")
+            # Ensure authentication
             if not sheets.service:
-                print("❌ Not authenticated. Run 'auth' first.")
-                sys.exit(1)
+                print("Authenticating...")
+                if not sheets.authenticate():
+                    print("❌ Authentication failed!")
+                    sys.exit(1)
             
             # This would trigger the Apps Script to generate the model
             # For now, we'll just read the existing data
@@ -63,9 +66,12 @@ def main():
         
         elif args.command == 'export':
             print("Exporting capacity model...")
+            # Ensure authentication
             if not sheets.service:
-                print("❌ Not authenticated. Run 'auth' first.")
-                sys.exit(1)
+                print("Authenticating...")
+                if not sheets.authenticate():
+                    print("❌ Authentication failed!")
+                    sys.exit(1)
             
             filename = args.output or f"capacity_model_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.csv"
             csv_file = sheets.export_capacity_model_to_csv(filename)
@@ -76,9 +82,12 @@ def main():
         
         elif args.command == 'insights':
             print("Generating insights...")
+            # Ensure authentication
             if not sheets.service:
-                print("❌ Not authenticated. Run 'auth' first.")
-                sys.exit(1)
+                print("Authenticating...")
+                if not sheets.authenticate():
+                    print("❌ Authentication failed!")
+                    sys.exit(1)
             
             insights = sheets.get_capacity_insights()
             if insights:
@@ -103,9 +112,12 @@ def main():
         
         elif args.command == 'matrix':
             print("Retrieving matrix criteria...")
+            # Ensure authentication
             if not sheets.service:
-                print("❌ Not authenticated. Run 'auth' first.")
-                sys.exit(1)
+                print("Authenticating...")
+                if not sheets.authenticate():
+                    print("❌ Authentication failed!")
+                    sys.exit(1)
             
             criteria = sheets.get_matrix_criteria()
             if criteria:
@@ -117,9 +129,12 @@ def main():
         
         elif args.command == 'update-matrix':
             print("Updating matrix criteria...")
+            # Ensure authentication
             if not sheets.service:
-                print("❌ Not authenticated. Run 'auth' first.")
-                sys.exit(1)
+                print("Authenticating...")
+                if not sheets.authenticate():
+                    print("❌ Authentication failed!")
+                    sys.exit(1)
             
             if args.criteria:
                 try:
