@@ -22,7 +22,7 @@ def load_config():
 def main():
     parser = argparse.ArgumentParser(description='Capacity Model CLI Tool')
     parser.add_argument('command', choices=[
-        'auth', 'generate', 'export', 'insights', 'matrix', 'update-matrix', 'trigger'
+        'auth', 'generate', 'export', 'insights', 'matrix', 'summary', 'update-matrix', 'trigger'
     ], help='Command to execute')
     parser.add_argument('--output', '-o', help='Output file for export')
     parser.add_argument('--webhook-url', help='Webhook URL for triggering updates')
@@ -121,11 +121,49 @@ def main():
             
             criteria = sheets.get_matrix_criteria()
             if criteria:
-                print("\n📋 Matrix Criteria:")
+                print("\n📋 Matrix Criteria (with Sales Bands):")
                 for role, criterion in criteria.items():
-                    print(f"  {role}: {criterion}")
+                    print(f"  {role}:")
+                    print(f"    Keywords: {criterion.get('keywords', '')}")
+                    print(f"    Sales Range: ${criterion.get('minSales', 0):,.2f} - ${criterion.get('maxSales', 999999999):,.2f}")
             else:
                 print("❌ No matrix criteria found.")
+        
+        elif args.command == 'summary':
+            print("Retrieving capacity summary...")
+            # Ensure authentication
+            if not sheets.service:
+                print("Authenticating...")
+                if not sheets.authenticate():
+                    print("❌ Authentication failed!")
+                    sys.exit(1)
+            
+            summary = sheets.get_capacity_summary_data()
+            if summary:
+                print("\n📊 Capacity Summary:")
+                print(f"Total Sales Reps: {summary.get('Total Sales Reps', 0)}")
+                print(f"Total Sales: ${summary.get('Total Sales', 0):,.2f}")
+                print(f"Average Sales per Rep: ${summary.get('Average Sales per Rep', 0):,.2f}")
+                print(f"Total Projects: {summary.get('Total Projects', 0)}")
+                print(f"International Projects: {summary.get('International Projects', 0)}")
+                
+                if summary.get('Top Performer'):
+                    print(f"Top Performer: {summary.get('Top Performer', '')}")
+                    print(f"Top Performer Sales: ${summary.get('Top Performer Sales', 0):,.2f}")
+                
+                print("\nProject Distribution:")
+                print(f"  Admin: {summary.get('Admin Projects', 0)}")
+                print(f"  Production Specialist: {summary.get('Production Specialist Projects', 0)}")
+                print(f"  Sr. Production Specialist: {summary.get('Sr. Production Specialist Projects', 0)}")
+                print(f"  Team Lead: {summary.get('Team Lead Projects', 0)}")
+                
+                print("\nCapacity Distribution:")
+                print(f"  Admin: {summary.get('Admin Percentage', 0):.1f}%")
+                print(f"  Production Specialist: {summary.get('Production Specialist Percentage', 0):.1f}%")
+                print(f"  Sr. Production Specialist: {summary.get('Sr. Production Specialist Percentage', 0):.1f}%")
+                print(f"  Team Lead: {summary.get('Team Lead Percentage', 0):.1f}%")
+            else:
+                print("❌ No summary data found. Generate capacity model first.")
         
         elif args.command == 'update-matrix':
             print("Updating matrix criteria...")

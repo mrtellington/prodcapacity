@@ -19,7 +19,10 @@ This integration provides:
 │                 │◄──►│     Script       │◄──►│   Integration   │
 │ • Sheet1        │    │                  │    │                 │
 │ • Matrix        │    │ • Process Data   │    │ • Python API    │
-│ • Capacity Model│    │ • Apply Logic    │    │ • CLI Tool      │
+│ • Capacity Rep  │    │ • Apply Logic    │    │ • CLI Tool      │
+│   Projection    │    │                  │    │                 │
+│ • Capacity      │    │                  │    │ • Summary       │
+│   Summary       │    │                  │    │                 │
 └─────────────────┘    │ • Generate Model │    │ • Insights      │
                        └──────────────────┘    └─────────────────┘
 ```
@@ -63,21 +66,22 @@ python capacity_cli.py insights
 
 ### 🔄 Automated Data Processing
 - Reads raw sales data from Sheet1
-- Applies configurable matrix criteria
-- Generates structured capacity model
+- Applies configurable matrix criteria with sales bands
+- Generates structured capacity model projections
 - Tracks international projects
 - Calculates role-based project counts
 
 ### 📈 Advanced Analytics
-- Sales performance analysis
+- Sales performance analysis with role-based projections
 - Capacity utilization insights
 - Top performer identification
 - Project distribution metrics
 - International project tracking
+- Comprehensive capacity summary dashboard
 
 ### 🔧 Flexible Configuration
-- Editable matrix criteria
-- Custom role definitions
+- Editable matrix criteria with sales bands
+- Custom role definitions and thresholds
 - Configurable export formats
 - Webhook integration support
 
@@ -174,6 +178,11 @@ python capacity_cli.py insights
 python capacity_cli.py matrix
 ```
 
+### Get Capacity Summary
+```bash
+python capacity_cli.py summary
+```
+
 ### Update Matrix Criteria
 ```bash
 python capacity_cli.py update-matrix --criteria new_criteria.json
@@ -184,9 +193,29 @@ python capacity_cli.py update-matrix --criteria new_criteria.json
 python capacity_cli.py trigger --webhook-url YOUR_WEBHOOK_URL
 ```
 
+## 🎯 New Features: Sales Bands & Enhanced Analytics
+
+### Sales Bands in Matrix
+The Matrix tab now includes sales bands for each role, allowing you to define:
+- **Keywords**: Text-based criteria for role assignment
+- **Min Sales ($)**: Minimum sales amount for the role
+- **Max Sales ($)**: Maximum sales amount for the role
+
+**Example Matrix Structure:**
+| Role | Keywords | Min Sales ($) | Max Sales ($) |
+|------|----------|---------------|---------------|
+| Admin | admin,management,supervision | 0 | 1,000 |
+| Production Specialist | production,assembly,manufacturing | 0 | 5,000 |
+| Sr. Production Specialist | senior,lead,expert,advanced | 5,000 | 25,000 |
+| Team Lead | team lead,supervisor,coordinator | 25,000 | 999,999,999 |
+
+### Enhanced Tabs
+- **Capacity Rep Projection**: Renamed from "Capacity Model" for clarity
+- **Capacity Summary**: New comprehensive dashboard with aggregated metrics
+
 ## 📊 Data Format
 
-### Capacity Model Output
+### Capacity Rep Projection Output
 | Column | Description |
 |--------|-------------|
 | Sales Rep First | First name of sales representative |

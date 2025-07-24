@@ -141,7 +141,7 @@ class GoogleSheetsIntegration:
         Returns:
             DataFrame with capacity model data
         """
-        data = self.read_sheet_data('Capacity Model')
+        data = self.read_sheet_data('Capacity Rep Projection')
         
         if not data:
             return pd.DataFrame()
@@ -159,12 +159,12 @@ class GoogleSheetsIntegration:
         
         return df
     
-    def get_matrix_criteria(self) -> Dict[str, str]:
+    def get_matrix_criteria(self) -> Dict[str, Dict[str, Any]]:
         """
-        Get matrix criteria from Matrix sheet
+        Get matrix criteria from Matrix sheet (now includes sales bands)
         
         Returns:
-            Dictionary mapping roles to criteria
+            Dictionary mapping roles to criteria with sales bands
         """
         data = self.read_sheet_data('Matrix')
         
@@ -173,24 +173,33 @@ class GoogleSheetsIntegration:
         
         criteria = {}
         for row in data[1:]:  # Skip header
-            if len(row) >= 2 and row[0] and row[1]:
-                criteria[row[0]] = row[1]
+            if len(row) >= 4 and row[0] and row[1]:
+                criteria[row[0]] = {
+                    'keywords': row[1],
+                    'minSales': float(row[2]) if len(row) > 2 and row[2] else 0,
+                    'maxSales': float(row[3]) if len(row) > 3 and row[3] else 999999999
+                }
         
         return criteria
     
-    def update_matrix_criteria(self, criteria: Dict[str, str]) -> bool:
+    def update_matrix_criteria(self, criteria: Dict[str, Dict[str, Any]]) -> bool:
         """
-        Update matrix criteria in Matrix sheet
+        Update matrix criteria in Matrix sheet (now includes sales bands)
         
         Args:
-            criteria: Dictionary mapping roles to criteria
+            criteria: Dictionary mapping roles to criteria with sales bands
         
         Returns:
             True if successful, False otherwise
         """
-        data = [['Role', 'Criteria']]  # Header
+        data = [['Role', 'Keywords', 'Min Sales ($)', 'Max Sales ($)']]  # Header
         for role, criterion in criteria.items():
-            data.append([role, criterion])
+            data.append([
+                role, 
+                criterion.get('keywords', ''),
+                criterion.get('minSales', 0),
+                criterion.get('maxSales', 999999999)
+            ])
         
         return self.write_sheet_data('Matrix', data)
     
@@ -301,6 +310,47 @@ class GoogleSheetsIntegration:
         }
         
         return insights
+    
+    def get_capacity_summary_data(self) -> Dict[str, Any]:
+        """
+        Get capacity summary data from Capacity Summary sheet
+        
+        Returns:
+            Dictionary with summary data
+        """
+        data = self.read_sheet_data('Capacity Summary')
+        
+        if not data:
+            return {}
+        
+        summary = {}
+        
+        # Parse the summary data
+        for row in data:
+            if len(row) >= 2 and row[0] and row[1]:
+                key = row[0].strip()
+                value = row[1]
+                
+                # Convert numeric values
+                if key in ['Total Sales Reps', 'Total Projects', 'International Projects']:
+                    try:
+                        value = int(value)
+                    except (ValueError, TypeError):
+                        value = 0
+                elif key in ['Total Sales', 'Average Sales per Rep', 'Top Performer Sales']:
+                    try:
+                        value = float(value.replace('$', '').replace(',', ''))
+                    except (ValueError, TypeError):
+                        value = 0.0
+                elif 'Percentage' in key:
+                    try:
+                        value = float(value.replace('%', ''))
+                    except (ValueError, TypeError):
+                        value = 0.0
+                
+                summary[key] = value
+        
+        return summary
 
 def main():
     """Example usage of the Google Sheets integration"""

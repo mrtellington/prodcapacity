@@ -1,0 +1,22 @@
+{
+  "Admin": {
+    "keywords": "admin,management,supervision,coordination",
+    "minSales": 0,
+    "maxSales": 1000
+  },
+  "Production Specialist": {
+    "keywords": "production,assembly,manufacturing,standard",
+    "minSales": 0,
+    "maxSales": 5000
+  },
+  "Sr. Production Specialist": {
+    "keywords": "senior,lead,expert,advanced,complex",
+    "minSales": 5000,
+    "maxSales": 25000
+  },
+  "Team Lead": {
+    "keywords": "team lead,supervisor,coordinator,project manager",
+    "minSales": 25000,
+    "maxSales": 999999999
+  }
+} 
