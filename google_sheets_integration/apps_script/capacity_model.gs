@@ -32,6 +32,9 @@ function createCapacityModel() {
     if (!matrixSheet) {
       Logger.log('Creating Matrix sheet...');
       createMatrixSheet();
+    } else {
+      // Check if Matrix needs upgrade to new structure
+      upgradeMatrixSheet();
     }
     
     // Get matrix criteria with sales bands
@@ -74,15 +77,30 @@ function getMatrixCriteria() {
   const data = matrixSheet.getDataRange().getValues();
   const criteria = {};
   
+  // Check if Matrix has old 2-column structure or new 4-column structure
+  const hasSalesBands = data.length > 0 && data[0].length >= 4;
+  
+  Logger.log(`Matrix structure detected: ${data[0].length} columns (hasSalesBands: ${hasSalesBands})`);
+  
   // Skip header row and process criteria
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
     if (row[0] && row[1]) { // Role and Criteria are not empty
-      criteria[row[0]] = {
-        keywords: row[1],
-        minSales: parseFloat(row[2]) || 0,
-        maxSales: parseFloat(row[3]) || 999999999
-      };
+      if (hasSalesBands) {
+        // New 4-column structure with sales bands
+        criteria[row[0]] = {
+          keywords: row[1],
+          minSales: parseFloat(row[2]) || 0,
+          maxSales: parseFloat(row[3]) || 999999999
+        };
+      } else {
+        // Old 2-column structure - convert to new format with default sales bands
+        criteria[row[0]] = {
+          keywords: row[1],
+          minSales: 0,
+          maxSales: 999999999
+        };
+      }
     }
   }
   
@@ -443,6 +461,7 @@ function addMenu() {
     .addItem('Generate Capacity Model', 'createCapacityModel')
     .addSeparator()
     .addItem('Refresh Matrix Criteria', 'refreshMatrixCriteria')
+    .addItem('Upgrade Matrix to Sales Bands', 'upgradeMatrixSheet')
     .addToUi();
 }
 
@@ -488,6 +507,56 @@ function doPost(e) {
   }
 }
 
+// Upgrade Matrix sheet from old 2-column to new 4-column structure
+function upgradeMatrixSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const matrixSheet = spreadsheet.getSheetByName('Matrix');
+  
+  if (!matrixSheet) {
+    Logger.log('Matrix sheet not found. Creating new one...');
+    createMatrixSheet();
+    return;
+  }
+  
+  const data = matrixSheet.getDataRange().getValues();
+  
+  // Check if already has 4 columns
+  if (data.length > 0 && data[0].length >= 4) {
+    Logger.log('Matrix sheet already has 4 columns. No upgrade needed.');
+    return;
+  }
+  
+  Logger.log('Upgrading Matrix sheet from 2-column to 4-column structure...');
+  
+  // Clear the sheet
+  matrixSheet.clear();
+  
+  // Set new headers
+  matrixSheet.getRange(1, 1, 1, 4).setValues([['Role', 'Keywords', 'Min Sales ($)', 'Max Sales ($)']]);
+  
+  // Set default criteria with sales bands
+  const defaultCriteria = [
+    ['Admin', 'admin,management,supervision', 0, 1000],
+    ['Production Specialist', 'production,assembly,manufacturing', 0, 5000],
+    ['Sr. Production Specialist', 'senior,lead,expert,advanced', 5000, 25000],
+    ['Team Lead', 'team lead,supervisor,coordinator', 25000, 999999999]
+  ];
+  
+  matrixSheet.getRange(2, 1, defaultCriteria.length, 4).setValues(defaultCriteria);
+  
+  // Format the sheet
+  matrixSheet.getRange(1, 1, 1, 4).setFontWeight('bold');
+  matrixSheet.getRange(1, 1, 1, 4).setBackground('#34a853');
+  matrixSheet.getRange(1, 1, 1, 4).setFontColor('white');
+  
+  // Format sales band columns
+  matrixSheet.getRange(2, 3, defaultCriteria.length, 2).setNumberFormat('$#,##0.00');
+  
+  matrixSheet.autoResizeColumns(1, 4);
+  
+  Logger.log('Matrix sheet upgraded successfully!');
+}
+
 // Initialize the spreadsheet with menu and matrix sheet
 function onOpen() {
   addMenu();
@@ -496,5 +565,8 @@ function onOpen() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet.getSheetByName('Matrix')) {
     createMatrixSheet();
+  } else {
+    // Check if Matrix needs upgrade
+    upgradeMatrixSheet();
   }
 } 
