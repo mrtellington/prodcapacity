@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install build twine
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Create Release Assets
+      run: |
+        mkdir -p release-assets
+        cp -r google_sheets_integration/ release-assets/
+        cp capacity_cli.py release-assets/
+        cp config.json release-assets/
+        cp requirements.txt release-assets/
+        cp setup_instructions.md release-assets/
+        cp README.md release-assets/
+        tar -czf release-assets/capacity-model-integration.tar.gz release-assets/
+    
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./release-assets/capacity-model-integration.tar.gz
+        asset_name: capacity-model-integration.tar.gz
+        asset_content_type: application/gzip 

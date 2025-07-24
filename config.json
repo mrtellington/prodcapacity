@@ -1,0 +1,23 @@
+{
+  "spreadsheet_id": "1fj4rwc3ZMNxBAlXvX-kMLIqcgPvXx79cwpCSH-7SmmU",
+  "spreadsheet_name": "Sales data - 7.1.24 - 6.30.25",
+  "sheets": {
+    "raw_data": "Sheet1",
+    "capacity_model": "Capacity Model",
+    "matrix": "Matrix"
+  },
+  "webhook": {
+    "enabled": false,
+    "url": ""
+  },
+  "export": {
+    "csv_enabled": true,
+    "default_filename": "capacity_model_{date}.csv"
+  },
+  "matrix_criteria": {
+    "Admin": "admin,management,supervision",
+    "Production Specialist": "production,assembly,manufacturing",
+    "Sr. Production Specialist": "senior,lead,expert,advanced",
+    "Team Lead": "team lead,supervisor,coordinator"
+  }
+} 
