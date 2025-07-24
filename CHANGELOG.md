@@ -161,9 +161,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Support
 
 For support and questions:
-- GitHub Issues: [Create an issue](https://github.com/yourusername/capacity-model-integration/issues)
-- Documentation: [Read the docs](https://github.com/yourusername/capacity-model-integration#readme)
-- Email: admin@productioncapacity.com
+- GitHub Issues: [Create an issue](https://github.com/mrtellington/capacity-model-integration/issues)
+- Documentation: [Read the docs](https://github.com/mrtellington/capacity-model-integration#readme)
+- Email: tod.ellington@whitestonebranding.com
 
 ---
 

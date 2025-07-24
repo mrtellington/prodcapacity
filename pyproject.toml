@@ -50,10 +50,10 @@ dev = [
 capacity-cli = "capacity_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/capacity-model-integration"
-Repository = "https://github.com/yourusername/capacity-model-integration"
-Documentation = "https://github.com/yourusername/capacity-model-integration#readme"
-Issues = "https://github.com/yourusername/capacity-model-integration/issues"
+Homepage = "https://github.com/mrtellington/capacity-model-integration"
+Repository = "https://github.com/mrtellington/capacity-model-integration"
+Documentation = "https://github.com/mrtellington/capacity-model-integration#readme"
+Issues = "https://github.com/mrtellington/capacity-model-integration/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

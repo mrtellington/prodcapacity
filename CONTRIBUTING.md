@@ -13,7 +13,7 @@ Thank you for your interest in contributing to the Capacity Model Integration pr
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/yourusername/capacity-model-integration.git
+   git clone https://github.com/mrtellington/capacity-model-integration.git
    cd capacity-model-integration
    ```
 
@@ -239,8 +239,8 @@ We follow [Semantic Versioning](https://semver.org/):
 ## 📞 Getting Help
 
 ### Resources
-- [GitHub Issues](https://github.com/yourusername/capacity-model-integration/issues)
-- [Documentation](https://github.com/yourusername/capacity-model-integration#readme)
+- [GitHub Issues](https://github.com/mrtellington/capacity-model-integration/issues)
+- [Documentation](https://github.com/mrtellington/capacity-model-integration#readme)
 - [Google Sheets API Documentation](https://developers.google.com/sheets/api)
 
 ### Questions
